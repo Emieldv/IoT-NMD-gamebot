@@ -10,93 +10,129 @@ client.on('ready', () => {
 });
 
 const https = require("https");
-var url = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/"
 
 client.on('message', msg => {
-  if (msg.content.substring(0, 1) == '!') {
-    var args = msg.content.substring(1).split(' ');
-    var cmd = args[0];
-    var playerID = args[1]
+      if (msg.content.substring(0, 1) == '!') {
+        var args = msg.content.substring(1).split(' ');
+        var cmd = args[0];
+        var username = args[1]
 
-    switch (cmd) {
+        switch (cmd) {
 
-      case 'bert':
+          case 'bert':
 
-        msg.channel.send({
-          "embed": {
-            "title": "Bert is een goeie gast!",
-            "color": 640001,
-            "timestamp": new Date(),
-            "footer": {},
-            "image": {
-              "url": "https://scontent-bru2-1.xx.fbcdn.net/v/t1.0-9/58629941_2945068898851767_6537583791001567232_o.jpg?_nc_cat=103&_nc_sid=85a577&_nc_ohc=IgbPdhqac5sAX8spvCr&_nc_ht=scontent-bru2-1.xx&oh=da33fd88ff32dcc43709d926a47d5340&oe=5EC59808"
-            },
-            "author": {
-              "name": "Emiel's Bot",
-              "url": "https://www.facebook.com/photo.php?fbid=2945068895518434&set=a.157371010954917&type=3&theater",
-              "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
-            },
-            "fields": []
-          }
-        })
-        break;
+            msg.channel.send({
+              "embed": {
+                "title": "Bert is een goeie gast!",
+                "color": 640001,
+                "timestamp": new Date(),
+                "footer": {},
+                "image": {
+                  "url": "https://scontent-bru2-1.xx.fbcdn.net/v/t1.0-9/58629941_2945068898851767_6537583791001567232_o.jpg?_nc_cat=103&_nc_sid=85a577&_nc_ohc=IgbPdhqac5sAX8spvCr&_nc_ht=scontent-bru2-1.xx&oh=da33fd88ff32dcc43709d926a47d5340&oe=5EC59808"
+                },
+                "author": {
+                  "name": "Emiel's Bot",
+                  "url": "https://www.facebook.com/photo.php?fbid=2945068895518434&set=a.157371010954917&type=3&theater",
+                  "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
+                },
+                "fields": []
+              }
+            })
+            break;
 
-      case 'cat':
+          case 'cat':
 
-        async function getCat() {
-          const {
-            file
-          } = await fetch('https://aws.random.cat/meow').then(response => response.json());
-          msg.channel.send(file)
-        }
-
-        getCat()
-        break;
-
-      case 'help':
-        msg.channel.send({
-          "embed": {
-            "title": "NMD-Gamebot | Help",
-            "description": "To view your Steam profile type: ```\n!profile <YourUserNameHere>```",
-            "color": 640001,
-            "timestamp": new Date(),
-            "footer": {},
-            "fields": []
-          }
-        })
-        break;
-
-      case 'profile':
-
-        console.log(playerID);
-
-        https.get("https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=E335909E1B7E0D704D4CF7284F125216&vanityurl=" + playerID, res => {
-          res.setEncoding("utf8");
-          let bodySteam = "";
-          res.on("data", steamData => {
-            bodySteam += steamData;
-          });
-
-          res.on("end", () => {
-            bodySteam = JSON.parse(bodySteam);
-            console.log("sucess = " + bodySteam.response.success);
-            if (bodySteam.response.success === 1) {
-              msg.channel.send("steamid = " + bodySteam.response.steamid);
+            async function getCat() {
+              const {
+                file
+              } = await fetch('https://aws.random.cat/meow').then(response => response.json());
+              msg.channel.send(file)
             }
-          })
-        });
 
-        break;
-        
-      default:
-        msg.channel.send({
-          "embed": {
-            "title": "❌ Type !help to see the possible commands",
-            "color": 640001
-          }
-        })
-    }
-  }
-});
+            getCat()
+            break;
 
-client.login(process.env.DISCORD_TOKEN);
+          case 'help':
+            msg.channel.send({
+              "embed": {
+                "title": "NMD-Gamebot | Help",
+                "description": "To view your Steam profile type: ```\n!profile <YourUserNameHere>```",
+                "color": 640001,
+                "timestamp": new Date(),
+                "footer": {},
+                "fields": []
+              }
+            })
+            break;
+
+          case 'profile':
+
+            https.get("https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + process.env.STEAM_TOKEN + "&vanityurl=" + username, res => {
+              res.setEncoding("utf8");
+              let bodySteam = "";
+              res.on("data", steamData => {
+                bodySteam += steamData;
+              });
+
+              res.on("end", () => {
+                  bodySteam = JSON.parse(bodySteam);
+                  if (bodySteam.response.success === 1) {
+                    searchId = (bodySteam.response.steamid)
+
+                    https.get("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + process.env.STEAM_TOKEN + "&steamids=" + searchId, res => {
+                        res.setEncoding("utf8");
+                        let bodySteam2 = "";
+                        res.on("data", steamData2 => {
+                          bodySteam2 += steamData2;
+                        });
+                        res.on("end", () => {
+                            bodySteam2 = JSON.parse(bodySteam2)
+                            var nickname = (bodySteam2.response.players[0].personaname);
+                            var profileUrl = (bodySteam2.response.players[0].profileurl);
+                            var avatar = (bodySteam2.response.players[0].avatarmedium);
+                            var realName = (bodySteam2.response.players[0].realname);
+
+                            msg.channel.send({
+                              "embed": {
+                                "title": realName,
+                                "description": "info over gamer",
+                                "color": 640001,
+                                "timestamp": new Date(),
+                                "thumbnail": {
+                                  "url": avatar
+                                },
+                                "author": {
+                                  "name":  nickname,
+                                  "url": profileUrl,
+                                  "icon_url": avatar
+                                }
+                              }
+                            })
+
+                            })});
+
+                          } else {
+                            msg.channel.send({
+                              "embed": {
+                                "title": "❌ No such account exists :(",
+                                "color": 640001
+                              }
+                            });
+                          }
+                        })
+                    });
+
+                  break;
+
+                  default:
+                  msg.channel.send({
+                    "embed": {
+                      "title": "❌ Type !help to see the possible commands",
+                      "color": 640001
+                    }
+                  })
+                }
+              }
+            });
+
+            client.login(process.env.DISCORD_TOKEN);
