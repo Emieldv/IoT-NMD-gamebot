@@ -17,36 +17,36 @@ client.on('ready', () => {
 // find steam id and redirect to right function
 function findSteamId(username, msg, integer) {
   https.get("https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + process.env.STEAM_TOKEN + "&vanityurl=" + username, res => {
-          res.setEncoding("utf8");
+    res.setEncoding("utf8");
 
-          let bodySteam = "";
+    let bodySteam = "";
 
-          res.on("data", steamData => {
-            bodySteam += steamData;
-          });
+    res.on("data", steamData => {
+      bodySteam += steamData;
+    });
 
-          res.on("end", () => {
-            bodySteam = JSON.parse(bodySteam);
+    res.on("end", () => {
+      bodySteam = JSON.parse(bodySteam);
 
-            if (bodySteam.response.success === 1) {
-              searchId = (bodySteam.response.steamid)
+      if (bodySteam.response.success === 1) {
+        searchId = (bodySteam.response.steamid)
 
-              // function to redirect to right function
-              if (integer === 1) {
-                steamProfile(searchId, msg)
-              }
+        // function to redirect to right function
+        if (integer === 1) {
+          steamProfile(searchId, msg)
+        }
 
-              // Show error if no profile is available
-            } else {
-              msg.channel.send({
-                "embed": {
-                  "title": "❌ No such account exists :(",
-                  "color": 640001
-                }
-              });
-            }
-          })
+        // Show error if no profile is available
+      } else {
+        msg.channel.send({
+          "embed": {
+            "title": "❌ No such account exists :(",
+            "color": 640001
+          }
         });
+      }
+    })
+  });
 }
 
 // create Steam profile mesage

@@ -4,7 +4,7 @@
         "color": 640001,
         "author": {
             "name": "NMD-Gamebot",
-            "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
+            "icon_url": "https://raw.githubusercontent.com/Emieldv/IoT-NMD-gamebot/master/gamebot.jpg"
         },
         "fields": [
             {
@@ -24,7 +24,8 @@
             "value": [
                 "!bert", 
                 "!cat", 
-                "!help"
+                "!help",
+                "!profile <username>"
             ],
             "inline": true
             },
@@ -33,7 +34,8 @@
             "value": [
                 "Used to check if bert is a goeie gast", 
                 "Used to see a random cat picture", 
-                "Used to view this page"
+                "Used to view this page",
+                "Check public profile information"
             ],
             "inline": true
             }
