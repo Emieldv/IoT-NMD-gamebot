@@ -7,6 +7,9 @@ https://discordapp.com/api/oauth2/authorize?client_id=702489115383300126&permiss
 ```sh
 $pip3 install Naked
 ```
+```sh
+npm install
+```
 
 ## .env
 don't forget to make a .env file

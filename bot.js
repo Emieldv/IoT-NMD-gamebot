@@ -2,13 +2,16 @@ require('dotenv').config();
 
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
+const https = require("https");
 const client = new Discord.Client();
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-const https = require("https");
+//
+//functions which need SteamID to function
+//
 
 // find steam id and redirect to right function
 function findSteamId(username, msg, integer) {
@@ -28,7 +31,7 @@ function findSteamId(username, msg, integer) {
               searchId = (bodySteam.response.steamid)
 
               // function to redirect to right function
-              if (integer === 1){
+              if (integer === 1) {
                 steamProfile(searchId, msg)
               }
 
@@ -84,7 +87,9 @@ function steamProfile(id, msg) {
   })
 }
 
-// search for message starting with "!" and redirect
+//
+// check if message starts with "!" and redirect
+//
 client.on('message', msg => {
   if (msg.content.substring(0, 1) == '!') {
     var args = msg.content.substring(1).split(' ');
