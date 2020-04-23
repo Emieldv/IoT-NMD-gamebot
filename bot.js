@@ -3,6 +3,7 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const https = require("https");
+var help = require("./help.json")
 const client = new Discord.Client();
 
 client.on('ready', () => {
@@ -134,16 +135,9 @@ client.on('message', msg => {
 
       // !help
       case 'help':
-        msg.channel.send({
-          "embed": {
-            "title": "NMD-Gamebot | Help",
-            "description": "To view your Steam profile type: ```\n!profile <YourUserNameHere>```",
-            "color": 640001,
-            "timestamp": new Date(),
-            "footer": {},
-            "fields": []
-          }
-        })
+
+        msg.channel.send(help)
+        
         break;
 
       // !profile <Profilename>

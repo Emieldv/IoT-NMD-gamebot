@@ -1,0 +1,42 @@
+{
+    "embed": {
+        "description": "NMD-gamebot is the easiest way to view steam info in discord!.",
+        "color": 640001,
+        "author": {
+            "name": "NMD-Gamebot",
+            "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
+        },
+        "fields": [
+            {
+            "name": "Add to discord",
+            "value": "NMD-Gamebot can be added to as many servers as you want! [Click here to add it to yours.](https://discordapp.com/api/oauth2/authorize?client_id=702489115383300126&permissions=67584&scope=bot)"
+            },
+            {
+            "name": "\u200b",
+            "value": "\u200b"
+            },
+            {
+            "name": "NMD-Gamebot commands",
+            "value": "These are the commands NMD-Gamebot accepts"
+            },
+            {
+            "name": "Commands",
+            "value": [
+                "!bert", 
+                "!cat", 
+                "!help"
+            ],
+            "inline": true
+            },
+            {
+            "name": "Function",
+            "value": [
+                "Used to check if bert is a goeie gast", 
+                "Used to see a random cat picture", 
+                "Used to view this page"
+            ],
+            "inline": true
+            }
+        ]
+    }
+}
