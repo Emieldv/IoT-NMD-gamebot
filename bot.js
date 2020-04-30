@@ -16,6 +16,7 @@ client.on('ready', () => {
 
 // find steam id and redirect to right function
 function findSteamId(username, msg, integer) {
+  
   https.get("https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + process.env.STEAM_TOKEN + "&vanityurl=" + username, res => {
     res.setEncoding("utf8");
 
@@ -31,10 +32,7 @@ function findSteamId(username, msg, integer) {
       if (bodySteam.response.success === 1) {
         searchId = (bodySteam.response.steamid)
 
-        // function to redirect to right function
-        if (integer === 1) {
-          steamProfile(searchId, msg)
-        }
+        steamProfile(searchId, msg, integer)
 
         // Show error if no profile is available
       } else {
@@ -49,8 +47,8 @@ function findSteamId(username, msg, integer) {
   });
 }
 
-// create Steam profile mesage
-function steamProfile(id, msg) {
+// create Steam profile mesage or send to requested function
+function steamProfile(id, msg, integer) {
 
   https.get("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + process.env.STEAM_TOKEN + "&steamids=" + id, res => {
     res.setEncoding("utf8");
@@ -67,25 +65,103 @@ function steamProfile(id, msg) {
       var profileUrl = (bodySteam2.response.players[0].profileurl);
       var avatar = (bodySteam2.response.players[0].avatarmedium);
       var realName = (bodySteam2.response.players[0].realname);
+      var personastate = (bodySteam2.response.players[0].personastate);
+      var playerstatus = null;
 
-      msg.channel.send({
-        "embed": {
-          "title": realName,
-          "description": "info over gamer",
-          "color": 640001,
-          "timestamp": new Date(),
-          "thumbnail": {
-            "url": avatar
-          },
-          "author": {
-            "name": nickname,
-            "url": profileUrl,
-            "icon_url": avatar
+      if (personastate == 0) {
+        playerstatus = "Offline"
+      } else if (personastate == 1){
+        playerstatus = "Online"
+      }
+      else if (personastate == 2){
+        playerstatus = "Busy"
+      }
+      else if (personastate == 3){
+        playerstatus = "Away"
+      }
+      else if (personastate == 4){
+        playerstatus = "Snoozing"
+      }
+      else if (personastate == 5){
+        playerstatus = "Looking to trade"
+      }
+      else if (personastate == 6){
+        playerstatus = "Looking to play"
+      }
+
+      // execute requested function
+      if (integer == 2) {
+
+        friends(id, msg, nickname, profileUrl, avatar, realName, playerstatus)
+
+      } else {
+
+        // else only show profile
+        msg.channel.send({
+          "embed": {
+            "title": realName,
+            "description": "The player is: " + playerstatus,
+            "color": 640001,
+            "timestamp": new Date(),
+            "thumbnail": {
+              "url": avatar
+            },
+            "author": {
+              "name": nickname,
+              "url": profileUrl,
+              "icon_url": avatar
+            }
           }
-        }
-      })
+        })
+      }
     })
   })
+}
+
+// function for requesting fiendlist
+function friends(id, msg, nickname, profileUrl, avatar, realName, playerstatus){
+
+  https.get("https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=" + process.env.STEAM_TOKEN + "&steamid=" + id + "&relationship=friend", res => {
+    res.setEncoding("utf8");
+
+    let bodySteam3 = "";
+
+    res.on("data", steamData3 => {
+      bodySteam3 += steamData3;
+    });
+
+    res.on("end", () => {
+      bodySteam3 = JSON.parse(bodySteam3);
+
+      var friendName = ""
+      var friends = []
+
+      //TODO
+      //process data
+
+      //get steamid's of friends
+      bodySteam3.friendslist.friends.forEach(item => {
+        console.log(item.steamid);
+
+        https.get("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + process.env.STEAM_TOKEN + "&steamids=" + item.steamid, res => {
+          res.setEncoding("utf8");
+          let bodySteam31 = "";
+
+          res.on("data", steamData31 => {
+            bodySteam31 += steamData31;
+          });
+
+          res.on("end", () => {
+          bodySteam31 = JSON.parse(bodySteam31)
+
+          friendName = bodySteam31.response.players[0].personaname
+          
+          msg.channel.send(friendName)
+          })
+        })
+      });
+    })
+  });
 }
 
 //
@@ -98,27 +174,6 @@ client.on('message', msg => {
     var username = args[1]
 
     switch (cmd) {
-
-      // !bert
-      case 'bert':
-
-        msg.channel.send({
-          "embed": {
-            "title": "Bert is een goeie gast!",
-            "color": 640001,
-            "timestamp": new Date(),
-            "footer": {},
-            "image": {
-              "url": "https://scontent-bru2-1.xx.fbcdn.net/v/t1.0-9/58629941_2945068898851767_6537583791001567232_o.jpg?_nc_cat=103&_nc_sid=85a577&_nc_ohc=IgbPdhqac5sAX8spvCr&_nc_ht=scontent-bru2-1.xx&oh=da33fd88ff32dcc43709d926a47d5340&oe=5EC59808"
-            },
-            "author": {
-              "name": "Emiel's Bot",
-              "url": "https://www.facebook.com/photo.php?fbid=2945068895518434&set=a.157371010954917&type=3&theater",
-              "icon_url": "https://cdn.discordapp.com/embed/avatars/0.png"
-            }
-          }
-        })
-        break;
 
       // !cat
       case 'cat':
@@ -144,6 +199,12 @@ client.on('message', msg => {
       case 'profile':
 
         findSteamId(username, msg, 1)
+
+        break;
+
+      case 'friends':
+
+        findSteamId(username, msg, 2)
 
         break;
       

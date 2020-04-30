@@ -21,9 +21,9 @@
             },
             {
             "name": "Commands",
-            "value": [
-                "!bert", 
-                "!cat", 
+            "value": [ 
+                "!cat",
+                "!friends <username>",
                 "!help",
                 "!profile <username>"
             ],
@@ -31,9 +31,9 @@
             },
             {
             "name": "Function",
-            "value": [
-                "Used to check if bert is a goeie gast", 
-                "Used to see a random cat picture", 
+            "value": [ 
+                "Used to see a random cat picture",
+                "View a player's friendlist", 
                 "Used to view this page",
                 "Check public profile information"
             ],
