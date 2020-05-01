@@ -25,7 +25,9 @@
                 "!cat",
                 "!friends <username>",
                 "!help",
-                "!profile <username>"
+                "!ping",
+                "!profile <username>",
+                "!recent <username>"
             ],
             "inline": true
             },
@@ -35,7 +37,9 @@
                 "Used to see a random cat picture",
                 "View a player's friendlist", 
                 "Used to view this page",
-                "Check public profile information"
+                "Check if the bot is currently online",
+                "Check public profile information",
+                "Gives a list of games played in the last two weeks"
             ],
             "inline": true
             }

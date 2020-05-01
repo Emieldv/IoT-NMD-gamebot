@@ -94,6 +94,10 @@ function steamProfile(id, msg, integer) {
 
         friends(id, msg, nickname, profileUrl, avatar, realName, playerstatus)
 
+      }else if(integer == 3){
+
+        recent(id, msg, nickname, profileUrl, avatar, realName)
+
       } else {
 
         // else only show profile
@@ -118,9 +122,63 @@ function steamProfile(id, msg, integer) {
   })
 }
 
+var friendList = []
+var friendRealNameList = []
+
+// function to gather and post friendslist
+function PostFriendList(name, msg, bodySteam3, nickname, profileUrl, avatar, realName, playerstatus, friendRealName){
+
+  //add nickname to list
+  friendList.push(name)
+
+  // if real name is null replace with /, otherwise add real name to list
+  if (friendRealName == null){
+    friendRealNameList.push("/")
+  } else {
+    friendRealNameList.push(friendRealName)
+  }
+
+  // send the message when list is completed
+  if (friendList.length == bodySteam3.friendslist.friends.length){
+    msg.channel.send({
+      "embed": {
+        "title": realName,
+        "description": "The player is: " + playerstatus,
+        "color": 640001,
+        "timestamp": new Date(),
+        "thumbnail": {
+          "url": avatar
+        },
+        "author": {
+          "name": nickname,
+          "url": profileUrl,
+          "icon_url": avatar
+        },
+        "fields": [
+          {
+            "name": "Friend Nickname",
+            "value": friendList,
+            "inline": true
+          },
+          {
+            "name": "Real Name",
+            "value": friendRealNameList ,
+            "inline": true
+          }
+        ]
+      }
+    })
+  }
+}
+
 // function for requesting fiendlist
 function friends(id, msg, nickname, profileUrl, avatar, realName, playerstatus){
+  
+  //reset friendslist
+  friendList = []
+  friendRealNameList = []
 
+  //get friendlist
   https.get("https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=" + process.env.STEAM_TOKEN + "&steamid=" + id + "&relationship=friend", res => {
     res.setEncoding("utf8");
 
@@ -133,15 +191,9 @@ function friends(id, msg, nickname, profileUrl, avatar, realName, playerstatus){
     res.on("end", () => {
       bodySteam3 = JSON.parse(bodySteam3);
 
-      var friendName = ""
-      var friends = []
-
-      //TODO
-      //process data
-
-      //get steamid's of friends
+      //get names of friends and sent them to next function
       bodySteam3.friendslist.friends.forEach(item => {
-        console.log(item.steamid);
+        // console.log(item.steamid);
 
         https.get("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + process.env.STEAM_TOKEN + "&steamids=" + item.steamid, res => {
           res.setEncoding("utf8");
@@ -154,9 +206,14 @@ function friends(id, msg, nickname, profileUrl, avatar, realName, playerstatus){
           res.on("end", () => {
           bodySteam31 = JSON.parse(bodySteam31)
 
-          friendName = bodySteam31.response.players[0].personaname
-          
-          msg.channel.send(friendName)
+          var friendName = bodySteam31.response.players[0].personaname
+          var friendRealName = bodySteam31.response.players[0].realname
+
+          // console.log(friendName)
+          // console.log(friendRealName)
+
+          PostFriendList(friendName, msg, bodySteam3, nickname, profileUrl, avatar, realName, playerstatus, friendRealName)
+
           })
         })
       });
@@ -164,8 +221,89 @@ function friends(id, msg, nickname, profileUrl, avatar, realName, playerstatus){
   });
 }
 
+// Convert time to minutes and hours
+function timeConvert(n) {
+  var num = n;
+  var hours = (num / 60);
+  var rhours = Math.floor(hours);
+  var minutes = (hours - rhours) * 60;
+  var rminutes = Math.round(minutes);
+  return rhours + " hours and " + rminutes + " minutes.";
+  }
+
+// 
+function recent(id, msg, nickname, profileUrl, avatar, realName) {
+
+  //Get recent list
+  https.get("https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=" + process.env.STEAM_TOKEN + "&steamid=" + id, res => {
+    res.setEncoding("utf8");
+
+    let bodySteam4 = "";
+
+    res.on("data", steamData4 => {
+      bodySteam4 += steamData4;
+    });
+
+    res.on("end", () => {
+      bodySteam4 = JSON.parse(bodySteam4);
+
+      var recentCount = bodySteam4.response.total_count
+      var recentNames = []
+      var playTime = []
+
+      // check if there are recent games
+      if (bodySteam4.response.games == null){
+        msg.channel.send({
+          "embed": {
+            "title": "❌ No recent played games :(",
+            "color": 640001
+          }
+        });
+      } else {
+        //create recent lists
+        bodySteam4.response.games.forEach(item => {
+          recentNames.push(item.name)
+        })
+        bodySteam4.response.games.forEach(item => {
+          playTime.push(timeConvert(item.playtime_2weeks))
+        })
+  
+        //send message
+        msg.channel.send({
+          "embed": {
+            "title": realName,
+            "description": "The player recently played " + recentCount + " games!" ,
+            "color": 640001,
+            "timestamp": new Date(),
+            "thumbnail": {
+              "url": avatar
+            },
+            "author": {
+              "name": nickname,
+              "url": profileUrl,
+              "icon_url": avatar
+            },
+            "fields": [
+              {
+                "name": "Recent Games:",
+                "value": recentNames,
+                "inline": true
+              },
+              {
+                "name": "Recent Playtime:",
+                "value": playTime,
+                "inline": true
+              }
+            ]
+          }
+        })
+      }
+    })
+  });
+}
+
 //
-// check if message starts with "!" and redirect
+// Check if message starts with "!" and redirect
 //
 client.on('message', msg => {
   if (msg.content.substring(0, 1) == '!') {
@@ -177,7 +315,7 @@ client.on('message', msg => {
 
       // !cat
       case 'cat':
-
+        msg.react('👍')
         async function getCat() {
           const {
             file
@@ -188,23 +326,33 @@ client.on('message', msg => {
         getCat()
         break;
 
+      case 'ping':
+        msg.channel.send("pong")
+        
+        break;
       // !help
       case 'help':
-
+        msg.react('👍')
         msg.channel.send(help)
         
         break;
 
       // !profile <Profilename>
       case 'profile':
-
+        msg.react('👍')
         findSteamId(username, msg, 1)
 
         break;
 
       case 'friends':
-
+        msg.react('👍')
         findSteamId(username, msg, 2)
+
+        break;
+
+      case 'recent':
+        msg.react('👍')
+        findSteamId(username, msg, 3)
 
         break;
       
