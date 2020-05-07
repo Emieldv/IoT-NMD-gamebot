@@ -22,6 +22,7 @@
             {
             "name": "Commands",
             "value": [ 
+                "!ban <username>",
                 "!cat",
                 "!friends <username>",
                 "!help",
@@ -34,6 +35,7 @@
             {
             "name": "Function",
             "value": [ 
+                "Check player ban status",
                 "Used to see a random cat picture",
                 "View a player's friendlist", 
                 "Used to view this page",

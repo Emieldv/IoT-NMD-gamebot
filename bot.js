@@ -94,9 +94,13 @@ function steamProfile(id, msg, integer) {
 
         friends(id, msg, nickname, profileUrl, avatar, realName, playerstatus)
 
-      }else if(integer == 3){
+      } else if(integer == 3) {
 
         recent(id, msg, nickname, profileUrl, avatar, realName)
+
+      } else if(integer == 4) {
+
+        ban(id, msg, nickname, profileUrl, avatar, realName, playerstatus)
 
       } else {
 
@@ -231,7 +235,7 @@ function timeConvert(n) {
   return rhours + " hours and " + rminutes + " minutes.";
   }
 
-// 
+// get recent played games
 function recent(id, msg, nickname, profileUrl, avatar, realName) {
 
   //Get recent list
@@ -302,6 +306,68 @@ function recent(id, msg, nickname, profileUrl, avatar, realName) {
   });
 }
 
+function ban(id, msg, nickname, profileUrl, avatar, realName, playerstatus){
+
+  https.get("https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=" + process.env.STEAM_TOKEN + "&steamids=" + id, res => {
+    res.setEncoding("utf8");
+
+    let bodySteam5 = "";
+
+    res.on("data", steamData5 => {
+      bodySteam5 += steamData5;
+    });
+
+    res.on("end", () => {
+      bodySteam5 = JSON.parse(bodySteam5);
+
+      var communityBan = bodySteam5.players[0].CommunityBanned
+      !communityBan ? communityBan = "Not Banned" : communityBan ="Banned";
+      
+      var vacBan = bodySteam5.players[0].VACBanned
+      !vacBan ? vacBan = "Not Banned" : vacBan ="Banned";
+
+      var numberOfVacBans = bodySteam5.players[0].NumberOfVACBans
+
+      var daysSinceBan = bodySteam5.players[0].DaysSinceLastBan
+
+      var numberOfGamebans = bodySteam5.players[0].NumberOfGameBans
+
+      var economyBan = bodySteam5.players[0].EconomyBan
+      economyBan == "none" ? economyBan = "Not banned" : economyBan
+
+      msg.channel.send({
+        "embed": {
+          "title": realName,
+          "description": "The player is: " + playerstatus,
+          "color": 640001,
+          "timestamp": new Date(),
+          "thumbnail": {
+            "url": avatar
+          },
+          "author": {
+            "name": nickname,
+            "url": profileUrl,
+            "icon_url": avatar
+          },
+          "fields": [
+            {
+              "name": "Bans:",
+              "value": ["CommunityBanned:", "VACBanned:", "Number Of VACBans:", "Days Since Last Ban:", "Number Of GameBans:", "Economy Ban:"],
+              "inline": true
+            },
+            {
+              "name": "Recent Playtime:",
+              "value": [communityBan, vacBan, numberOfVacBans, daysSinceBan, numberOfGamebans, economyBan],
+              "inline": true
+            }
+          ]
+        }
+      })
+
+    });
+  });
+};
+
 //
 // Check if message starts with "!" and redirect
 //
@@ -353,6 +419,12 @@ client.on('message', msg => {
       case 'recent':
         msg.react('👍')
         findSteamId(username, msg, 3)
+
+        break;
+
+      case 'ban':
+        msg.react('👍')
+        findSteamId(username, msg, 4)
 
         break;
       
