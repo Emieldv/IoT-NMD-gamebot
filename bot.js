@@ -102,6 +102,10 @@ function steamProfile(id, msg, integer) {
 
         ban(id, msg, nickname, profileUrl, avatar, realName, playerstatus)
 
+      } else if(integer == 5) {
+
+        games(id, msg, nickname, profileUrl, avatar, realName)
+
       } else {
 
         // else only show profile
@@ -306,6 +310,7 @@ function recent(id, msg, nickname, profileUrl, avatar, realName) {
   });
 }
 
+// get player bans
 function ban(id, msg, nickname, profileUrl, avatar, realName, playerstatus){
 
   https.get("https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=" + process.env.STEAM_TOKEN + "&steamids=" + id, res => {
@@ -368,6 +373,57 @@ function ban(id, msg, nickname, profileUrl, avatar, realName, playerstatus){
   });
 };
 
+function games(id, msg, nickname, profileUrl, avatar, realName) {
+
+  https.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=" + process.env.STEAM_TOKEN + "&steamid=" + id + "&include_appinfo=true", res => {
+    res.setEncoding("utf8");
+
+    let bodySteam6 = "";
+
+    res.on("data", steamData6 => {
+      bodySteam6 += steamData6;
+    });
+
+    res.on("end", () => {
+      bodySteam6 = JSON.parse(bodySteam6);
+
+      var gameCount = bodySteam6.response.game_count
+      var games = []
+      
+      //create recent lists
+      bodySteam6.response.games.forEach(item => {
+        games.push(item.name)
+      })
+
+      console.log(games)
+      
+      //send message
+      msg.channel.send({
+        "embed": {
+          "title": realName,
+          "description": "The player owns " + gameCount + " games!" ,
+          "color": 640001,
+          "timestamp": new Date(),
+          "thumbnail": {
+            "url": avatar
+          },
+          "author": {
+            "name": nickname,
+            "url": profileUrl,
+            "icon_url": avatar
+          },
+          "fields": [
+            {
+              "name": "Recent Games:",
+              "value": games,
+            },
+          ]
+        }
+      })
+    })
+  })
+}
+
 //
 // Check if message starts with "!" and redirect
 //
@@ -425,6 +481,12 @@ client.on('message', msg => {
       case 'ban':
         msg.react('👍')
         findSteamId(username, msg, 4)
+
+        break;
+      
+      case 'games':
+        msg.react('👍')
+        findSteamId(username, msg, 5)
 
         break;
       

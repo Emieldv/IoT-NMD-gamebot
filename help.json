@@ -9,7 +9,7 @@
         "fields": [
             {
             "name": "Add to discord",
-            "value": "NMD-Gamebot can be added to as many servers as you want! [Click here to add it to yours.](https://discordapp.com/api/oauth2/authorize?client_id=702489115383300126&permissions=67584&scope=bot)"
+            "value": "NMD-Gamebot can be added to as many servers as you want! [Click here to add it to yours.](shorturl.at/aetZ9)"
             },
             {
             "name": "\u200b",
@@ -25,6 +25,7 @@
                 "!ban <username>",
                 "!cat",
                 "!friends <username>",
+                "!games <username>",
                 "!help",
                 "!ping",
                 "!profile <username>",
@@ -37,7 +38,8 @@
             "value": [ 
                 "Check player ban status",
                 "Used to see a random cat picture",
-                "View a player's friendlist", 
+                "View a player's friendlist",
+                "Vieuw a player's owned games",
                 "Used to view this page",
                 "Check if the bot is currently online",
                 "Check public profile information",
