@@ -3,13 +3,37 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const https = require("https");
-var help = require("./help.json")
+var help = require("./help.json");
+var firebase = require("firebase/app");
 const client = new Discord.Client();
+require("firebase/auth");
+require("firebase/firestore");
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
-
+//
+//Firebase initialisation
+//
+const dbConfig = {
+        collection: 'Discord',
+        document: 'userInfo',
+      }      
+const firebaseConfig = {
+  // Config for project on firebase
+  // TODO: deze variabelen in de .env file plaatsen
+  apiKey: "AIzaSyA5vFdUNxGxYHkBskgUeE4fZSOCPeQMc3Y",
+  authDomain: "iot-eindproject.firebaseapp.com",
+  databaseURL: "https://iot-eindproject.firebaseio.com",
+  projectId: "iot-eindproject",
+  storageBucket: "iot-eindproject.appspot.com",
+  messagingSenderId: "491345327673",
+  appId: "1:491345327673:web:d40685d6df5e7fb683bfe8",
+  measurementId: "G-6NPS040N3H"
+};  
+// Initialise firebase and firestore
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore()
 //
 //functions which need SteamID to function
 //
@@ -126,6 +150,12 @@ function steamProfile(id, msg, integer) {
           }
         })
       }
+      // Put the avatar in a database
+      // Voorlopig enkel avatar, maar da kan uitgebreid worden
+      db.collection(dbConfig.collection).doc(dbConfig.document)
+        .update({
+          avatar: avatar,
+        });
     })
   })
 }

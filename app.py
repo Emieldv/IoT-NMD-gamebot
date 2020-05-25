@@ -1,18 +1,40 @@
-# from sense_hat import Sensehat
-from Naked.toolshed.shell import execute_js, muterun_js
+from sense_hat import SenseHat
+#from Naked.toolshed.shell import execute_js, muterun_js
+from firebase_admin import credentials, firestore
+import sys
+import firebase_admin
+import threading
 
-# sense = Sensehat
-# sense.set_rotation(270)
+COLLECTION = 'Discord'
+DOCUMENT = 'userInfo'
 
-success = execute_js('bot.js')
+# Firebase
+cred = credentials.Certificate('./iot-eindproject-firebase-adminsdk-jxtfi-69fb32dd3c.json')
+firebase_admin.initialize_app(cred)
 
-if success:
-    print('het is gelukt')
-else:
-    print('mislukt')
+#success = execute_js('bot.js')
+#if success:
 
+#else:
+   #print('mislukt')
 
-# try:
-#     main()
-# except (KeyboardInterrupt, SystemExit):
-#     print("programma sluiten")
+def update_sensehat(doc_snapshot, changes, read_time):
+    for doc in doc_snapshot:
+        doc_readable = doc.to_dict()
+        print(doc_readable)
+
+        avatar = pi_ref.get().to_dict()['avatar']
+        # Hier moet de functie komen om de avatar op de sensehat te plaatsen
+
+# connect firestore
+db = firestore.client()
+pi_ref = db.collection(COLLECTION).document(DOCUMENT)
+pi_watch = pi_ref.on_snapshot(update_sensehat)
+
+#senseHat
+sense = SenseHat()
+sense.set_imu_config(False,False,False)
+sense.clear()
+
+while True:
+	pass
