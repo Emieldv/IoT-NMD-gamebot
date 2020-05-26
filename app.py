@@ -1,5 +1,5 @@
 import firebase_admin
-from firebase_admin import credentials, db
+from firebase_admin import credentials, firestore, db
 
 from sense_hat import SenseHat
 import sys
@@ -11,39 +11,63 @@ import PIL
 from PIL import Image
 import os
 
+#
 # Firebase
+#
+
+# Define the credentials using the service account
 cred = credentials.Certificate('./iot-eindproject-firebase-adminsdk-jxtfi-69fb32dd3c.json')
+firebase_admin.initialize_app(cred)
+db = firestore.client()
 
-firebase_admin.initialize_app(cred, {
-    'databaseURL' : 'https://iot-eindproject.firebaseio.com/'
-})
-
-ref = db.reference('users')
-snapshot = ref.order_by_child('-M8GA0Nym0jx_WjSe9JA').get()
-print(snapshot)
+# Define the ref point with collection
+users_ref = db.collection('gameBot')
+docs = users_ref.stream()
 
 avatarArray = []
 
+for doc in docs:
+    avatars = doc.to_dict().get('avatar')
+    avatarArray.append(avatars)
+
+#
 #senseHat
+#
 sense = SenseHat()
 sense.set_imu_config(False,False,False)
 sense.clear()
 
-"""
+arrayIndex = 0
+
+
 # Function to convert and show avatar
 # Get the 64 pixels you need
-basewidth = 8
-response = requests.get(avatar)
-img = Image.open(BytesIO(response.content))
-wpercent = (basewidth / float(img.size[0]))
-hsize = int((float(img.size[1]) * float(wpercent)))
-img = img.resize((basewidth, hsize), PIL.Image.ANTIALIAS)
+while True:
+    if (arrayIndex > len(avatarArray)):
+        avatarArray = 0
+    elif (arrayIndex < 0):
+        avatarArray = len(avatarArray)
 
-# Generate rgb values for image pixels
-rgb_img = img.convert('RGB')
-image_pixels = list(rgb_img.getdata())
-sense.set_pixels(image_pixels)
-time.sleep (8)
+    for event in sense.stick.get_events():
+        if event.action == "pressed":
+            if event.direction == "right":
+                #if (arrayIndex > len(avatarArray)):
+                #    arrayIndex = 0
+                #else:
+                arrayIndex += 1
+                print(arrayIndex)
+            if event.direction == "left":
+                #if (arrayIndex < 0):
+                    #arrayIndex = len(avatarArray)
+                #else:
+                arrayIndex -= 1
+                print(arrayIndex)
+            
+        
+        response = requests.get(avatarArray[arrayIndex])
+        img = Image.open(BytesIO(response.content))
+        imgSmall = img.resize((8,8), resample=Image.BILINEAR)
 
-sense.clear()
-
+        rgb_img = imgSmall.convert('RGB')
+        image_pixels = list(rgb_img.getdata())
+        sense.set_pixels(image_pixels)

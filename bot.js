@@ -1,15 +1,14 @@
 require('dotenv').config();
-
+var firebase = require('firebase/app')
+require('firebase/auth');
+require('firebase/firestore')
 const Discord = require('discord.js');
 const fetch = require('node-fetch');
 const https = require("https");
 var help = require("./help.json");
-var firebase = require("firebase/app");
-var admin = require("firebase-admin");
 const client = new Discord.Client();
-require("firebase/auth");
-require("firebase/firestore");
-require("firebase/database")
+
+const admin = require('firebase-admin');
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -28,10 +27,17 @@ const firebaseConfig = {
   appId: "1:491345327673:web:d40685d6df5e7fb683bfe8",
   measurementId: "G-6NPS040N3H"
 };  
-// Initialise firebase and firestore
-firebase.initializeApp(firebaseConfig);
-var database = firebase.database();
-//
+
+firebase.initializeApp(firebaseConfig)
+let serviceAccount = require('./iot-eindproject-firebase-adminsdk-jxtfi-69fb32dd3c.json');
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
+let db = firebase.firestore();
+
+
 //functions which need SteamID to function
 //
 
@@ -150,10 +156,10 @@ function steamProfile(id, msg, integer) {
       }
       // Put the avatar in a database
       // Voorlopig enkel avatar, maar da kan uitgebreid worden
-        database.ref('users').push({
-          //title: realName,
-          avatar: avatarSmall
-        })
+      let data = {
+        avatar: avatarSmall
+      }
+      let setDoc = db.collection('gameBot').doc(nickname).set(data)
     })
   })
 }
