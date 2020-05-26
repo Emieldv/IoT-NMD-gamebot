@@ -27,3 +27,7 @@ measurementId: [messagingSenderId]
 ```sh
 $ node bot.js
 ```
+## Run SenseHat
+```sh
+$ python3 app.py
+```
