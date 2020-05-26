@@ -5,20 +5,17 @@ const fetch = require('node-fetch');
 const https = require("https");
 var help = require("./help.json");
 var firebase = require("firebase/app");
+var admin = require("firebase-admin");
 const client = new Discord.Client();
 require("firebase/auth");
 require("firebase/firestore");
+require("firebase/database")
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 //
-//Firebase initialisation
-//
-const dbConfig = {
-        collection: 'Discord',
-        document: 'userInfo',
-      }      
+  
 const firebaseConfig = {
   // Config for project on firebase
   // TODO: deze variabelen in de .env file plaatsen
@@ -33,7 +30,7 @@ const firebaseConfig = {
 };  
 // Initialise firebase and firestore
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore()
+var database = firebase.database();
 //
 //functions which need SteamID to function
 //
@@ -153,10 +150,10 @@ function steamProfile(id, msg, integer) {
       }
       // Put the avatar in a database
       // Voorlopig enkel avatar, maar da kan uitgebreid worden
-      db.collection(dbConfig.collection).doc(dbConfig.document)
-        .update({
-          avatar: avatarSmall,
-        });
+        database.ref('users').push({
+          //title: realName,
+          avatar: avatarSmall
+        })
     })
   })
 }
@@ -221,7 +218,9 @@ function friends(id, msg, nickname, profileUrl, avatar, realName, playerstatus){
   https.get("https://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key=" + process.env.STEAM_TOKEN + "&steamid=" + id + "&relationship=friend", res => {
     res.setEncoding("utf8");
 
-    let bodySteam3 = "";
+    let
+    
+     bodySteam3 = "";
 
     res.on("data", steamData3 => {
       bodySteam3 += steamData3;
