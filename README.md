@@ -14,6 +14,14 @@ don't forget to make a .env file
 ```sh
 DISCORD_TOKEN=Yourtoken
 STEAM_TOKEN=YourSteamApiToken
+
+apiKey: [apiKey],
+authDomain: [authDomain],
+databaseURL: [databaseURL],
+storageBucket: [storageBucket],
+messagingSenderId: [messagingSenderId],
+appId: [appId],
+measurementId: [messagingSenderId]
 ```
 ## Run Bot
 ```sh

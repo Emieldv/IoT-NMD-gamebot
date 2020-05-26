@@ -18,15 +18,15 @@ client.on('ready', () => {
 const firebaseConfig = {
   // Config for project on firebase
   // TODO: deze variabelen in de .env file plaatsen
-  apiKey: "AIzaSyA5vFdUNxGxYHkBskgUeE4fZSOCPeQMc3Y",
-  authDomain: "iot-eindproject.firebaseapp.com",
-  databaseURL: "https://iot-eindproject.firebaseio.com",
+  apiKey: process.env.apiKey,
+  authDomain: process.env.authDomain,
+  databaseURL: process.env.databaseURL,
   projectId: "iot-eindproject",
-  storageBucket: "iot-eindproject.appspot.com",
-  messagingSenderId: "491345327673",
-  appId: "1:491345327673:web:d40685d6df5e7fb683bfe8",
-  measurementId: "G-6NPS040N3H"
-};  
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messagingSenderId,
+  appId: process.env.appId,
+  measurementId: process.env.measurementId
+};
 
 firebase.initializeApp(firebaseConfig)
 let serviceAccount = require('./iot-eindproject-firebase-adminsdk-jxtfi-69fb32dd3c.json');
