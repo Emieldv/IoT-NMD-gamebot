@@ -87,6 +87,7 @@ function steamProfile(id, msg, integer) {
 
       var nickname = (bodySteam2.response.players[0].personaname);
       var profileUrl = (bodySteam2.response.players[0].profileurl);
+      var avatarSmall = (bodySteam2.response.players[0].avatar);
       var avatar = (bodySteam2.response.players[0].avatarmedium);
       var realName = (bodySteam2.response.players[0].realname);
       var personastate = (bodySteam2.response.players[0].personastate);
@@ -154,7 +155,7 @@ function steamProfile(id, msg, integer) {
       // Voorlopig enkel avatar, maar da kan uitgebreid worden
       db.collection(dbConfig.collection).doc(dbConfig.document)
         .update({
-          avatar: avatar,
+          avatar: avatarSmall,
         });
     })
   })
