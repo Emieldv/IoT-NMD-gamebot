@@ -34,12 +34,13 @@ avatarArray = []
 for doc in docsFirst:
     avatars = doc.to_dict().get('avatar')
     avatarArray.append(avatars)
-avatarArray[:-1]
+
+avatarArray = avatarArray[:-1]
 
 def on_snapshot(col_snapshot, changes, read_time):
     for doc in col_snapshot:
         avatars = doc.get('avatar')
-        avatarArray.append(avatars)
+    avatarArray.append(avatars)
 
         
     callback_done.set()
@@ -60,29 +61,37 @@ print(avatarArray)
 
 # Function to convert and show avatar
 # Get the 64 pixels you need
-while True:
-    for event in sense.stick.get_events():
-        print(avatarArray)
-        if event.action == "pressed":
-            if event.direction == "right":
-                if (arrayIndex == len(avatarArray) - 1 ):
-                    print(arrayIndex)
-                    arrayIndex = 0
-                else:
-                    arrayIndex += 1
-                    print(arrayIndex)
-            if event.direction == "left":
-                if (arrayIndex <= 0):
-                    arrayIndex = len(avatarArray) - 1
-                    print(arrayIndex)
-                else:
-                    arrayIndex -= 1
-                    print(arrayIndex)
-        
-        response = requests.get(avatarArray[arrayIndex])
-        img = Image.open(BytesIO(response.content))
-        imgSmall = img.resize((8,8), resample=Image.BILINEAR)
+try:
+    while True:
+        for event in sense.stick.get_events():
+            print(avatarArray)
+            if event.action == "pressed":
+                if event.direction == "right":
+                    if (arrayIndex == len(avatarArray) - 1 ):
+                        print(arrayIndex)
+                        arrayIndex = 0
+                    else:
+                        arrayIndex += 1
+                        print(arrayIndex)
+                if event.direction == "left":
+                    if (arrayIndex <= 0):
+                        arrayIndex = len(avatarArray) - 1
+                        print(arrayIndex)
+                    else:
+                        arrayIndex -= 1
+                        print(arrayIndex)
+            
+            response = requests.get(avatarArray[arrayIndex])
+            img = Image.open(BytesIO(response.content))
+            imgSmall = img.resize((8,8), resample=Image.BILINEAR)
 
-        rgb_img = imgSmall.convert('RGB')
-        image_pixels = list(rgb_img.getdata())
-        sense.set_pixels(image_pixels)
+            rgb_img = imgSmall.convert('RGB')
+            image_pixels = list(rgb_img.getdata())
+            sense.set_pixels(image_pixels)
+
+except (KeyboardInterrupt, SystemExit):
+    print('Programma sluiten')
+finally:
+    print('Opkuisen van de matrix')
+    sense.clear()
+    sys.exit(0)

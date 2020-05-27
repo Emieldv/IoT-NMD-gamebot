@@ -9,7 +9,7 @@
         "fields": [
             {
             "name": "Add to discord",
-            "value": "NMD-Gamebot can be added to as many servers as you want! [Click here to add it to yours.](shorturl.at/aetZ9)"
+            "value": "NMD-Gamebot can be added to as many servers as you want! [Click here to add it to yours.](https://discord.com/api/oauth2/authorize?client_id=702489115383300126&permissions=523328&scope=bot)"
             },
             {
             "name": "\u200b",
