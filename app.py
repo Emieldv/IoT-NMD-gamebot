@@ -31,17 +31,17 @@ docsFirst = users_ref.stream()
 
 avatarArray = []
 
-for doc in docsFirst:
-    avatars = doc.to_dict().get('avatar')
-    avatarArray.append(avatars)
+# for doc in docsFirst:
+#     avatars = doc.to_dict().get('avatar')
+#     avatarArray.append(avatars)
 
 def on_snapshot(col_snapshot, changes, read_time):
     for doc in col_snapshot:
         avatars = doc.get('avatar')
-        avatarArray.remove(avatars)
         avatarArray.append(avatars)
       
     callback_done.set()
+    print(avatarArray)
 
 doc_watch = col_query.on_snapshot(on_snapshot)
 
@@ -54,23 +54,26 @@ sense.set_imu_config(False,False,False)
 sense.clear()
 
 arrayIndex = 0
-print(avatarArray[arrayIndex])
+print(avatarArray)
 
 
 # Function to convert and show avatar
 # Get the 64 pixels you need
 while True:
     for event in sense.stick.get_events():
+        print(avatarArray)
         if event.action == "pressed":
             if event.direction == "right":
                 if (arrayIndex == len(avatarArray) - 1 ):
-                   arrayIndex = 0
+                    print(arrayIndex)
+                    arrayIndex = 0
                 else:
                     arrayIndex += 1
                     print(arrayIndex)
             if event.direction == "left":
                 if (arrayIndex <= 0):
                     arrayIndex = len(avatarArray) - 1
+                    print(arrayIndex)
                 else:
                     arrayIndex -= 1
                     print(arrayIndex)
