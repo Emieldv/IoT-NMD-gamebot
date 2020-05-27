@@ -11,6 +11,8 @@ import PIL
 from PIL import Image
 import os
 
+callback_done = threading.Event()
+
 #
 # Firebase
 #blabla
@@ -21,14 +23,28 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Define the ref point with collection
+col_query = db.collection('gameBot')
+docs = col_query.stream()
+
 users_ref = db.collection('gameBot')
-docs = users_ref.stream()
+docsFirst = users_ref.stream()
 
 avatarArray = []
 
-for doc in docs:
+for doc in docsFirst:
     avatars = doc.to_dict().get('avatar')
     avatarArray.append(avatars)
+
+def on_snapshot(col_snapshot, changes, read_time):
+    for doc in col_snapshot:
+        avatars = doc.get('avatar')
+        avatarArray.remove(avatars)
+        avatarArray.append(avatars)
+      
+    callback_done.set()
+
+doc_watch = col_query.on_snapshot(on_snapshot)
+
 
 #
 #senseHat
@@ -38,12 +54,12 @@ sense.set_imu_config(False,False,False)
 sense.clear()
 
 arrayIndex = 0
+print(avatarArray[arrayIndex])
 
 
 # Function to convert and show avatar
 # Get the 64 pixels you need
 while True:
-    
     for event in sense.stick.get_events():
         if event.action == "pressed":
             if event.direction == "right":
