@@ -31,18 +31,19 @@ docsFirst = users_ref.stream()
 
 avatarArray = []
 
-# for doc in docsFirst:
-#     avatars = doc.to_dict().get('avatar')
-#     avatarArray.append(avatars)
+for doc in docsFirst:
+    avatars = doc.to_dict().get('avatar')
+    avatarArray.append(avatars)
+avatarArray[:-1]
 
 def on_snapshot(col_snapshot, changes, read_time):
     for doc in col_snapshot:
         avatars = doc.get('avatar')
         avatarArray.append(avatars)
-      
+
+        
     callback_done.set()
     print(avatarArray)
-
 doc_watch = col_query.on_snapshot(on_snapshot)
 
 
