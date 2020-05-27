@@ -43,26 +43,21 @@ arrayIndex = 0
 # Function to convert and show avatar
 # Get the 64 pixels you need
 while True:
-    if (arrayIndex > len(avatarArray)):
-        avatarArray = 0
-    elif (arrayIndex < 0):
-        avatarArray = len(avatarArray)
-
+    
     for event in sense.stick.get_events():
         if event.action == "pressed":
             if event.direction == "right":
-                #if (arrayIndex > len(avatarArray)):
-                #    arrayIndex = 0
-                #else:
-                arrayIndex += 1
-                print(arrayIndex)
+                if (arrayIndex == len(avatarArray) - 1 ):
+                   arrayIndex = 0
+                else:
+                    arrayIndex += 1
+                    print(arrayIndex)
             if event.direction == "left":
-                #if (arrayIndex < 0):
-                    #arrayIndex = len(avatarArray)
-                #else:
-                arrayIndex -= 1
-                print(arrayIndex)
-            
+                if (arrayIndex <= 0):
+                    arrayIndex = len(avatarArray) - 1
+                else:
+                    arrayIndex -= 1
+                    print(arrayIndex)
         
         response = requests.get(avatarArray[arrayIndex])
         img = Image.open(BytesIO(response.content))
