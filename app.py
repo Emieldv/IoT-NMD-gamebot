@@ -13,7 +13,7 @@ import os
 
 #
 # Firebase
-#
+#blabla
 
 # Define the credentials using the service account
 cred = credentials.Certificate('./iot-eindproject-firebase-adminsdk-jxtfi-69fb32dd3c.json')
