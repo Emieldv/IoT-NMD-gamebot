@@ -17,7 +17,6 @@ client.on('ready', () => {
   
 const firebaseConfig = {
   // Config for project on firebase
-  // TODO: deze variabelen in de .env file plaatsen
   apiKey: process.env.apiKey,
   authDomain: process.env.authDomain,
   databaseURL: process.env.databaseURL,
@@ -134,6 +133,10 @@ function steamProfile(id, msg, integer) {
 
         games(id, msg, nickname, profileUrl, avatar, realName)
 
+      } else if(integer == 6) {
+
+        sense(id, nickname, profileUrl, avatar, playerstatus)
+
       } else {
 
         // else only show profile
@@ -154,12 +157,15 @@ function steamProfile(id, msg, integer) {
           }
         })
       }
+      
       // Put the avatar in a database
       // Voorlopig enkel avatar, maar da kan uitgebreid worden
       let data = {
-        avatar: avatarSmall
+        nickname: nickname,
+        avatar: avatarSmall,
+        id: id
       }
-      let setDoc = db.collection('gameBot').doc(nickname).set(data)
+      let setDoc = db.collection('gameBot').doc(Date.now().toString()).set(data)
     })
   })
 }
@@ -460,6 +466,29 @@ function games(id, msg, nickname, profileUrl, avatar, realName) {
   })
 }
 
+// send message for raspberry 
+function sense(id, nickname, profileUrl, avatar, playerstatus) {
+
+  const channel = client.channels.cache.get('705749111340662784')
+
+  channel.send({
+    "embed": {
+      "title": "Requested by Raspberry pi",
+      "description": "The player is: " + playerstatus,
+      "color": 640001,
+      "timestamp": new Date(),
+      "thumbnail": {
+        "url": avatar
+      },
+      "author": {
+        "name": nickname,
+        "url": profileUrl,
+        "icon_url": avatar
+      }
+    }
+  })
+}
+
 //
 // Check if message starts with "!" and redirect
 //
@@ -537,5 +566,19 @@ client.on('message', msg => {
     }
   }
 });
+
+//check if raspberry sended a command
+let observer = db.collection('senseProfile')
+  .onSnapshot(querySnapshot => {
+    querySnapshot.docChanges().forEach(change => {
+      if (change.type === 'modified') {
+        var senseProfile = change.doc.data()
+        senseProfile = senseProfile.id
+        console.log(senseProfile)
+        
+        steamProfile(senseProfile, 0, 6)
+      }
+    });
+  });
 
 client.login(process.env.DISCORD_TOKEN);

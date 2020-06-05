@@ -1,6 +1,5 @@
 import firebase_admin
 from firebase_admin import credentials, firestore, db
-
 from sense_hat import SenseHat
 import sys
 import threading
@@ -12,10 +11,6 @@ from PIL import Image
 import os
 
 callback_done = threading.Event()
-
-#
-# Firebase
-#blabla
 
 # Define the credentials using the service account
 cred = credentials.Certificate('./iot-eindproject-firebase-adminsdk-jxtfi-69fb32dd3c.json')
@@ -29,65 +24,108 @@ docs = col_query.stream()
 users_ref = db.collection('gameBot')
 docsFirst = users_ref.stream()
 
-avatarArray = []
+#
+#Make arrays and convert images
+#
 
+#Arrays with picture and names
+avatarArray = []
+nameArray = []
+idArray = []
+
+#declare arrayindex
+arrayIndex = 0
+
+#Convert image to 8x8 image
+def convertImage(avatar):
+    response = requests.get(avatar)
+    img = Image.open(BytesIO(response.content))
+    imgSmall = img.resize((8,8), resample=Image.BILINEAR)
+
+    rgb_img = imgSmall.convert('RGB')
+
+    avatarArray.append(rgb_img)
+
+#Get all the profiles in database
 for doc in docsFirst:
-    avatars = doc.to_dict().get('avatar')
-    avatarArray.append(avatars)
+    avatar = doc.to_dict().get('avatar')
+    name = doc.to_dict().get('nickname')
+    steamId = doc.to_dict().get('id')
+
+    nameArray.append(name)
+    idArray.append(steamId)
+    convertImage(avatar)
 
 avatarArray = avatarArray[:-1]
+nameArray = nameArray[:-1]
+idArray = idArray[:-1]
 
+#Get newly added profile
 def on_snapshot(col_snapshot, changes, read_time):
     for doc in col_snapshot:
-        avatars = doc.get('avatar')
-    avatarArray.append(avatars)
+        avatar = doc.get('avatar')
+        name = doc.get('nickname')
+        steamId = doc.get('id')
+    convertImage(avatar)
+    nameArray.append(name)
+    idArray.append(steamId)
 
         
     callback_done.set()
     print(avatarArray)
+    print(nameArray) 
+    print(idArray) 
+
+    showLastProfile()   
+
 doc_watch = col_query.on_snapshot(on_snapshot)
 
-
-#
-#senseHat
-#
+#Declare senseHat
 sense = SenseHat()
 sense.set_imu_config(False,False,False)
 sense.clear()
 
-arrayIndex = 0
-print(avatarArray)
+#Show last picture added
+def showLastProfile():
 
+    global arrayIndex
+    arrayIndex = len(avatarArray) - 1
+    image_pixels = list(avatarArray[arrayIndex].getdata())
+    sense.show_message(nameArray[arrayIndex], scroll_speed=0.03)
+    sense.set_pixels(image_pixels)
 
-# Function to convert and show avatar
-# Get the 64 pixels you need
+#Show profile nickname and picture
+def showProfile():
+
+    image_pixels = list(avatarArray[arrayIndex].getdata())
+    sense.show_message(nameArray[arrayIndex], scroll_speed=0.03)
+    sense.set_pixels(image_pixels)
+
 try:
     while True:
         for event in sense.stick.get_events():
-            print(avatarArray)
+            #When joystick is pressed left or right change arrayindex and display image
             if event.action == "pressed":
                 if event.direction == "right":
                     if (arrayIndex == len(avatarArray) - 1 ):
-                        print(arrayIndex)
                         arrayIndex = 0
                     else:
                         arrayIndex += 1
-                        print(arrayIndex)
+                    showProfile()
                 if event.direction == "left":
                     if (arrayIndex <= 0):
                         arrayIndex = len(avatarArray) - 1
-                        print(arrayIndex)
                     else:
                         arrayIndex -= 1
-                        print(arrayIndex)
-            
-            response = requests.get(avatarArray[arrayIndex])
-            img = Image.open(BytesIO(response.content))
-            imgSmall = img.resize((8,8), resample=Image.BILINEAR)
+                    showProfile()
+                #when joystick is pressed send steamid to firestore
+                if event.direction == "middle":
+                    data = {
+                        'id' : idArray[arrayIndex]
+                    }
 
-            rgb_img = imgSmall.convert('RGB')
-            image_pixels = list(rgb_img.getdata())
-            sense.set_pixels(image_pixels)
+                    db.collection('senseProfile').document('Last').set(data)
+
 
 except (KeyboardInterrupt, SystemExit):
     print('Programma sluiten')
