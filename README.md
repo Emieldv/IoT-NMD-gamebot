@@ -5,7 +5,6 @@ https://discordapp.com/api/oauth2/authorize?client_id=702489115383300126&permiss
 
 ## installations
 ```sh
-$pip3 install Naked
 $npm install
 ```
 
@@ -27,7 +26,7 @@ measurementId: [messagingSenderId]
 ```sh
 $ node bot.js
 ```
-## Run SenseHat
+## Run Python script
 ```sh
 $ python3 app.py
 ```
