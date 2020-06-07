@@ -7,6 +7,10 @@ const fetch = require('node-fetch');
 const https = require("https");
 var help = require("./help.json");
 const client = new Discord.Client();
+const util = require('util');
+
+// Change the default array option to have no limit
+util.inspect.defaultOptions.maxArrayLength = null;
 
 const admin = require('firebase-admin');
 
@@ -158,14 +162,26 @@ function steamProfile(id, msg, integer) {
         })
       }
       
-      // Put the avatar in a database
-      // Voorlopig enkel avatar, maar da kan uitgebreid worden
+      // Put the nickname, avatar and id in firestore
       let data = {
         nickname: nickname,
         avatar: avatarSmall,
         id: id
       }
-      let setDoc = db.collection('gameBot').doc(Date.now().toString()).set(data)
+
+      // Check if there is a document with the nickname, if it exists, do nothing, else push the data to firestore (needs tweeking)
+      let query = db.collection('gamebot').where('nickname', '==', nickname);
+      query.get()
+        .then((querySnapshot) => {
+          if (querySnapshot.exists) {
+            query.onSnapshot((doc) => {
+              console.log('Already exists ' + doc.data)
+            })
+          } else {
+            // Set the title of the document to the nickname of the steamprofile
+            db.collection('gameBot').doc(nickname).set(data)
+          }
+        })
     })
   })
 }
@@ -434,10 +450,11 @@ function games(id, msg, nickname, profileUrl, avatar, realName) {
       
       //create recent lists
       bodySteam6.response.games.forEach(item => {
-        games.push(item.name)
+          games.push(item.name)
       })
 
-      console.log(games)
+      console.log(games);
+      
       
       //send message
       msg.channel.send({

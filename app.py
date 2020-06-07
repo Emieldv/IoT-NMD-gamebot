@@ -25,18 +25,18 @@ users_ref = db.collection('gameBot')
 docsFirst = users_ref.stream()
 
 #
-#Make arrays and convert images
+# Make arrays and convert images
 #
 
-#Arrays with picture and names
+# Arrays with picture and names
 avatarArray = []
 nameArray = []
 idArray = []
 
-#declare arrayindex
+# declare arrayindex
 arrayIndex = 0
 
-#Convert image to 8x8 image
+# Convert image to 8x8 image
 def convertImage(avatar):
     response = requests.get(avatar)
     img = Image.open(BytesIO(response.content))
@@ -46,7 +46,7 @@ def convertImage(avatar):
 
     avatarArray.append(rgb_img)
 
-#Get all the profiles in database
+# Get all the profiles in database
 for doc in docsFirst:
     avatar = doc.to_dict().get('avatar')
     name = doc.to_dict().get('nickname')
@@ -60,7 +60,7 @@ avatarArray = avatarArray[:-1]
 nameArray = nameArray[:-1]
 idArray = idArray[:-1]
 
-#Get newly added profile
+# Get newly added profile
 def on_snapshot(col_snapshot, changes, read_time):
     for doc in col_snapshot:
         avatar = doc.get('avatar')
@@ -80,29 +80,36 @@ def on_snapshot(col_snapshot, changes, read_time):
 
 doc_watch = col_query.on_snapshot(on_snapshot)
 
-#Declare senseHat
+# Declare senseHat
 sense = SenseHat()
 sense.set_imu_config(False,False,False)
 sense.clear()
 
-#Show last picture added
+# Show the name of the profile
+def showNameMessage():
+    sense.show_message(nameArray[arrayIndex], scroll_speed=0.03)
+    # sense.set_pixels(image_pixels)
+
+# Show last picture added
 def showLastProfile():
 
     global arrayIndex
     arrayIndex = len(avatarArray) - 1
     image_pixels = list(avatarArray[arrayIndex].getdata())
-    sense.show_message(nameArray[arrayIndex], scroll_speed=0.03)
-    sense.set_pixels(image_pixels)
 
-#Show profile nickname and picture
+# Show profile nickname and picture
 def showProfile():
 
     image_pixels = list(avatarArray[arrayIndex].getdata())
-    sense.show_message(nameArray[arrayIndex], scroll_speed=0.03)
+    # sense.show_message(nameArray[arrayIndex], scroll_speed=0.03)
     sense.set_pixels(image_pixels)
 
 try:
     while True:
+        # Before interacting with joystick --> show photo of last profile in array
+        showProfile()
+
+        # Describe every event when interacting with joystick
         for event in sense.stick.get_events():
             #When joystick is pressed left or right change arrayindex and display image
             if event.action == "pressed":
@@ -118,13 +125,15 @@ try:
                     else:
                         arrayIndex -= 1
                     showProfile()
-                #when joystick is pressed send steamid to firestore
+                # When joystick is pressed down send --> steamid to firestore
                 if event.direction == "middle":
                     data = {
                         'id' : idArray[arrayIndex]
                     }
 
                     db.collection('senseProfile').document('Last').set(data)
+                    # show the name of the profile sent to firestore
+                    showNameMessage()
 
 
 except (KeyboardInterrupt, SystemExit):
