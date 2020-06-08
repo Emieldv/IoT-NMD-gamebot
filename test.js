@@ -444,57 +444,64 @@ function games(id, msg, nickname, profileUrl, avatar, realName) {
       bodySteam6 = JSON.parse(bodySteam6);
 
       var gameCount = bodySteam6.response.game_count
+      var gamePages = Math.ceil(gameCount / 20)
       var games = []
+      let page = 1; 
       
       //create recent lists
       bodySteam6.response.games.forEach(item => {
         games.push(item.name)
       })
 
-      if (games.length < 60) {
-        //send message
-        msg.channel.send({
-          "embed": {
-            "title": realName,
-            "description": "The player owns " + gameCount + " games!" ,
-            "color": 640001,
-            "timestamp": new Date(),
-            "thumbnail": {
-              "url": avatar
+      var gamesEmbed =  {
+        "embed": {
+          "title": realName,
+          "description": "The player owns " + gameCount + " games!" ,
+          "color": 640001,
+          "timestamp": new Date(),
+          "thumbnail": {
+            "url": avatar
+          },
+          "author": {
+            "name": nickname,
+            "url": profileUrl,
+            "icon_url": avatar
+          },
+          "fields": [
+            {
+              "name": "Recent Games:",
+              "value": games.slice(20 * (page - 1), 20 * page),
             },
-            "author": {
-              "name": nickname,
-              "url": profileUrl,
-              "icon_url": avatar
-            },
-            "fields": [
-              {
-                "name": "Recent Games:",
-                "value": games,
-              },
-            ]
-          }
-        })
-      } else {
-        msg.channel.send({
-          "embed": {
-            "title": realName,
-            "description": "The player owns " + gameCount + " games! There are too many games to list, so to see the games, go to go to the player's Steam profile" ,
-            "color": 640001,
-            "timestamp": new Date(),
-            "thumbnail": {
-              "url": avatar
-            },
-            "author": {
-              "name": nickname,
-              "url": profileUrl,
-              "icon_url": avatar
-            },
-          }
-        })
-      };
+          ]
+        }
+      }
+      msg.channel.send(gamesEmbed).then(message => {
 
-      console.log(games);
+        message.react('⬅').then( r => {
+          message.react('➡')
+    
+            // Filters
+            const backwardsFilter = (reaction, user) => reaction.emoji.name === '⬅' && user.id === msg.author.id;
+            const forwardsFilter = (reaction, user) => reaction.emoji.name === '➡' && user.id === msg.author.id;
+    
+            const backwards = message.createReactionCollector(backwardsFilter, {timer: 600});
+            const forwards = message.createReactionCollector(forwardsFilter, {timer: 600});
+    
+            backwards.on('collect', r => {
+                if (page === 1) return;
+                page--;
+                message.channel.send(page)
+                message.edit(gamesEmbed)
+            })
+    
+            forwards.on('collect', r => {
+                if (page === gamePages) return;
+                page++;
+                message.channel.send(page)
+                message.channel.send(gamesEmbed)
+            })
+        })
+    })
     })
   })
 }
