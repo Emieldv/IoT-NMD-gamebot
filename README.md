@@ -30,3 +30,8 @@ $ node bot.js
 ```sh
 $ python3 app.py
 ```
+
+## Video
+```sh
+https://youtu.be/BVGP6x69KhE
+```
