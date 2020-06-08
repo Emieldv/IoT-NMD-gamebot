@@ -450,35 +450,53 @@ function games(id, msg, nickname, profileUrl, avatar, realName) {
       
       //create recent lists
       bodySteam6.response.games.forEach(item => {
-          games.push(item.name)
+        games.push(item.name)
       })
 
-      console.log(games);
-      
-      
-      //send message
-      msg.channel.send({
-        "embed": {
-          "title": realName,
-          "description": "The player owns " + gameCount + " games!" ,
-          "color": 640001,
-          "timestamp": new Date(),
-          "thumbnail": {
-            "url": avatar
-          },
-          "author": {
-            "name": nickname,
-            "url": profileUrl,
-            "icon_url": avatar
-          },
-          "fields": [
-            {
-              "name": "Recent Games:",
-              "value": games,
+      if (games.length < 60) {
+        //send message
+        msg.channel.send({
+          "embed": {
+            "title": realName,
+            "description": "The player owns " + gameCount + " games!" ,
+            "color": 640001,
+            "timestamp": new Date(),
+            "thumbnail": {
+              "url": avatar
             },
-          ]
-        }
-      })
+            "author": {
+              "name": nickname,
+              "url": profileUrl,
+              "icon_url": avatar
+            },
+            "fields": [
+              {
+                "name": "Recent Games:",
+                "value": games,
+              },
+            ]
+          }
+        })
+      } else {
+        msg.channel.send({
+          "embed": {
+            "title": realName,
+            "description": "The player owns " + gameCount + " games! There are too many games to list, so to see the games, go to go to the player's Steam profile" ,
+            "color": 640001,
+            "timestamp": new Date(),
+            "thumbnail": {
+              "url": avatar
+            },
+            "author": {
+              "name": nickname,
+              "url": profileUrl,
+              "icon_url": avatar
+            },
+          }
+        })
+      };
+
+      console.log(games);
     })
   })
 }
